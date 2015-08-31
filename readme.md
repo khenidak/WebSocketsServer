@@ -1,4 +1,4 @@
-#WebSocket Server for Owin & Azure Service Fabric#
+#WebSocket Server for Owin (& Azure Service Fabric) #
 
 This repo contains components that implement a Web Socket Server (.NET) for Owin. The web socket server uses Owin Startup routine, allowing you to have additional Owin stages before or after the web socket server stage. The web socket server contains a session manager that allows hosting process to interact with active web socket sessions (for example server side broadcast messages). The sessions are implemented on top of a sequential queue (per each) that surfaces granular control on messages going to the down stream (details discussed [here](http://henidak.com/2015/08/web-socket-p1/)). 
 
@@ -149,8 +149,7 @@ In order to allow ordered messages on the down stream. The web socket server set
                 {
                     
                     return DateTime.Now.Ticks;
-                },
-                taskP);
+                });
 
                 lt.QueueId = "Q01"; // which queue this task belongs to
                 lt.IsHighPriority = true; // put at the beginning of the q
