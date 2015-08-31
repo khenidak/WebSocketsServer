@@ -144,20 +144,20 @@ In order to allow ordered messages on the down stream. The web socket server set
 
 **Typical Usage:** 
 
-	```
-	LeveledTask<long> lt = new LeveledTask<long>( () =>
-                    {
-                        
-                        return DateTime.Now.Ticks;
-                    },
-                    taskP);
+	
+		LeveledTask<long> lt = new LeveledTask<long>( () =>
+                {
+                    
+                    return DateTime.Now.Ticks;
+                },
+                taskP);
 
-                    lt.QueueId = "Q01"; // which queue this task belongs to
-                    lt.IsHighPriority = true; // put at the beginning of the q
-                    lt.Start(scheduler);
-                
-	await lt; 
-	```
+                lt.QueueId = "Q01"; // which queue this task belongs to
+                lt.IsHighPriority = true; // put at the beginning of the q
+                lt.Start(scheduler);
+            
+		await lt; 
+
 
 There is also LeveledTask for tasks that does not return results. 
 
