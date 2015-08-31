@@ -17,14 +17,13 @@ This further extended for Azure Service Fabric specific hosting.
 The below code uses the web socket server with a self hosted Owin server
 
 	```
-	            _echoFactory = new TestWebSocketSessionFactory();
+	 _echoFactory = new TestWebSocketSessionFactory();
 
-            IDisposable server = WebApp.Start(_serverAddress, app =>
+     IDisposable server = WebApp.Start(_serverAddress, app =>
                 {
-                    	app.MapWebSocket<WebSocketSessionManager<TestWebSocketSession>, TestWebSocketSession>(_echoFactory);
+                    	app.MapWebSocket<WebSocketSessionManager<TestWebSocketSession>, 	TestWebSocketSession>(_echoFactory);
                 }
             );
-
 
 	```
 
