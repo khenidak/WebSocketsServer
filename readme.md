@@ -7,7 +7,7 @@ This further extended for Azure Service Fabric specific hosting.
 
 
 ## Using it with Owin##
-** Typical Usage Pattern **
+**Typical Usage Pattern**
 
 1. Create your socket types (subclass-ing *WebSocketSessionBase*). Each represents a session type. For example "Customer". They can expose business logic specific methods such as SendComplete each result into one or more messages send to the down stream. 
 2. You can also expose server side messages that *OnReceiveAsync* can route to.
@@ -16,7 +16,7 @@ This further extended for Azure Service Fabric specific hosting.
 
 The below code uses the web socket server with a self hosted Owin server
 
-	```
+	
 	 _echoFactory = new TestWebSocketSessionFactory();
 
      IDisposable server = WebApp.Start(_serverAddress, app =>
@@ -25,7 +25,7 @@ The below code uses the web socket server with a self hosted Owin server
                 }
             );
 
-	```
+	
 
 > Check the unit test project for the complete sample code. 
 
@@ -41,7 +41,7 @@ The below code uses the web socket server with a self hosted Owin server
 
 You can use the SessionManager instance to interact with all the connected web sockets that was created by the manager (as a result of Owin pipeline calls) as the following
 
-	```
+	
 	//m_Manager is a session manager attached to Owin as the above code. 
 	// this returns all sockets 
 	m_Manager.GetSession((session) => true);
@@ -50,19 +50,20 @@ You can use the SessionManager instance to interact with all the connected web s
     reach (var client in clients)
          await ((GeneralWSSession)client).SayHelloToGeneral(string.Format("To all general - {0}", DateTime.UtcNow.Ticks));
 
-	```
+	
 
 ## Using it with Service Fabric ##
 WebSocketServer.ServiceFabric.Services library contain classes that you need to run the web socket server in context of Service Fabric. The session manager Service Fabric uses enables you manage sockets of different types (mapped to different addresses). 
 
-** Typical Usage Pattern (Services Side): ** 
+**Typical Usage Pattern (Services Side):** 
 
 - Create classes that implements your web socket (subclass-ing ServiceFabricSocketSessionBase class). For example i have 3 General, Customer & Order each implements a different socket. 
 >You can also map just one socket implementation. 
 
 - Use WebSocketCommunicationListener in your service as the following  
 
-	```
+	
+
        protected override ICommunicationListener CreateCommunicationListener()
         {
             m_listener = new WebSocketCommunicationListener(StateManager);
@@ -95,7 +96,7 @@ WebSocketServer.ServiceFabric.Services library contain classes that you need to 
         }
 
 
-	```
+	
 
 **Notes**
 - The listener injects Service's IReliableStateManager into the sockets. This enables you to call reliable collections in your sockets.  
@@ -104,7 +105,8 @@ WebSocketServer.ServiceFabric.Services library contain classes that you need to 
 
 - The listener maintains a reference to the Session Manager where you can access it from anywhere in your service (for example in OnRunAsync method) as the following:
 
-	```
+	
+
       // m_listener is an instance of WebSocketCommunicationListener 
 
 	  // the predicate below can be anything that filters sessions
@@ -114,13 +116,14 @@ WebSocketServer.ServiceFabric.Services library contain classes that you need to 
             await ((GeneralWSSession)client).SayHelloToGeneral(string.Format("To all general - {0}", DateTime.UtcNow.Ticks));
         
 
-	``` 
+	 
+
 - Service Fabric extends the default session manager to implement a multi type session manager.  
 
 > check the TestStatefulSvc project for the complete sample code.  
 
 
-** Typical Usage Pattern (Client Side): ** 
+**Typical Usage Pattern (Client Side):** 
 
 On the client side you can use standard ClientWebSocket (of System.Net.WebSockets namespace). You can use them using standard service resolution approach or you can use *ServiceFabricWebSocketClient* & *ServiceFabricWebSocketClientFactory* together they implement Service Fabric *ICommunicationClient*  & *CommunicationClientFactoryBase*. Those have the following Characterstics:
  
