@@ -66,7 +66,7 @@ WebSocketServer.ServiceFabric.Services library contain classes that you need to 
 
 **Typical Usage Pattern (Services Side):** 
 
-- Create classes that implements your web socket (subclass-ing ServiceFabricSocketSessionBase class). For example i have 3 General, Customer & Order each implements a different socket. 
+- Create classes that implement your web socket (subclass-ing ServiceFabricSocketSessionBase class). For example i have 3 General, Customer & Order each implements a different socket (the entire code is in sample service and sample client projects). 
 
 
 - Use WebSocketCommunicationListener in your service as the following  
