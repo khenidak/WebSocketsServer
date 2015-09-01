@@ -9,10 +9,15 @@ This is further extended for Azure Service Fabric specific hosting.
 ## Using it with Owin##
 **Typical Usage Pattern**
 
-1. Create your socket types (subclass-ing *WebSocketSessionBase*). Each represents a session type. For example "Customer". They can expose business logic specific methods such as SendComplete each result into one or more messages send to the down stream. 
-2. You can also expose server side messages that *OnReceiveAsync* can route to.
-3. Optionally implement a session manager (subclass-ing *WebSocketSessionManager<t>*) or use the out of the box manager *WebSocketSessionManager* (Example: please refer to the code below for a custom manager that maps different socket types to different Owin routes)  
-4. Call one of the many Owin extension methods.
+1. Create your socket types (subclass-ing *WebSocketSessionBase*). Each represents a session type. For example "Customer". They can expose business logic specific methods such as SendPOComplete. Each may result into one or more messages send to the down stream. 
+
+2. The server instantiate a new instance of socket type for every incoming new connection. 
+ 
+3. You can also expose server side messages that *OnReceiveAsync* method can route to.
+
+4. Optionally implement a session manager (subclass-ing *WebSocketSessionManager<t>*) or use the out of the box manager *WebSocketSessionManager* (Example: please refer to the code below for a custom manager that maps different socket types to different Owin routes)  
+
+5. Call one of the many Owin extension methods included in the library.
 
 The below code uses the web socket server with a self hosted Owin server
 
@@ -31,9 +36,13 @@ The below code uses the web socket server with a self hosted Owin server
 
 
 - The Session Manager (referred to as factory in test project) contains a reference to all active sockets currently connected. Server can interact with the via *GetSession(predicate Func)* method. For example a server process - which hosts the web socket server - can find all active sessions matching a certain criteria then call methods to send messages on the downstream. For further details check the code below.
+
 - Socket session class implements a Post & a Send methods. Send puts the message at the beginning of the downstream queue while Post puts it at the end. Both depends on the custom task scheduler discussed below. 
+
 - Socket Session & Session Manager implement IDisposable and will close sessions(s) when they are GCed or Disposed.
+
 - Socket session implement close (async), abort (sync) and DrainAndClose which waits for the messages on the downstream (prior to the drain event) to be sent to connected client before closing the session.
+
 - The package contains a custom Owin middle-ware and extension methods that allows you to quickly integrate it in your Owin pipeline. 
 
 
@@ -109,9 +118,9 @@ WebSocketServer.ServiceFabric.Services library contain classes that you need to 
 
 	
 
-      // m_listener is an instance of WebSocketCommunicationListener 
+      	// m_listener is an instance of WebSocketCommunicationListener 
 
-	  // the predicate below can be anything that filters sessions
+	  	// the predicate below can be anything that filters sessions
 		var clients = m_listener.SessionManager.GetSession((session) => null != (session as GeneralWSSession));
 
         foreach (var client in clients)
