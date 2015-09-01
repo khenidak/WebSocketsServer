@@ -2,7 +2,7 @@
 
 This repo contains components that implement a Web Socket Server (.NET) for Owin. The web socket server uses Owin Startup routine, allowing you to have additional Owin stages before or after the web socket server stage. The web socket server contains a session manager that allows hosting process to interact with active web socket sessions (for example server side broadcast messages). The sessions are implemented on top of a sequential queue (per each) that surfaces granular control on messages going to the down stream (details discussed [here](http://henidak.com/2015/08/web-socket-p1/)). 
 
-This further extended for Azure Service Fabric specific hosting. 
+This is further extended for Azure Service Fabric specific hosting. 
 
 
 
@@ -11,8 +11,8 @@ This further extended for Azure Service Fabric specific hosting.
 
 1. Create your socket types (subclass-ing *WebSocketSessionBase*). Each represents a session type. For example "Customer". They can expose business logic specific methods such as SendComplete each result into one or more messages send to the down stream. 
 2. You can also expose server side messages that *OnReceiveAsync* can route to.
-2. Optionally implement a session manager (subclass-ing *WebSocketSessionManager<t>*) or use the out of the box manager *WebSocketSessionManager* (Example: please refer to the code below for a custom manager that maps different socket types to different Owin routes)  
-3. Call one of the many Owin extension methods.
+3. Optionally implement a session manager (subclass-ing *WebSocketSessionManager<t>*) or use the out of the box manager *WebSocketSessionManager* (Example: please refer to the code below for a custom manager that maps different socket types to different Owin routes)  
+4. Call one of the many Owin extension methods.
 
 The below code uses the web socket server with a self hosted Owin server
 
@@ -58,13 +58,12 @@ WebSocketServer.ServiceFabric.Services library contain classes that you need to 
 **Typical Usage Pattern (Services Side):** 
 
 - Create classes that implements your web socket (subclass-ing ServiceFabricSocketSessionBase class). For example i have 3 General, Customer & Order each implements a different socket. 
->You can also map just one socket implementation. 
+
 
 - Use WebSocketCommunicationListener in your service as the following  
 
 	
-
-       protected override ICommunicationListener CreateCommunicationListener()
+       	protected override ICommunicationListener CreateCommunicationListener()
         {
             m_listener = new WebSocketCommunicationListener(StateManager);
             // map to any type that implements ServiceFabricWebSocketSessionBase
@@ -96,12 +95,15 @@ WebSocketServer.ServiceFabric.Services library contain classes that you need to 
         }
 
 
+>You can also map just one socket implementation. 
 	
 
 **Notes**
 - The listener injects Service's IReliableStateManager into the sockets. This enables you to call reliable collections in your sockets.  
 
-- The listener also exposes Owin Startup to you so you can use *OnOwinPreMapping* and *OnOwinPostMapping* method to wire up anyother custom Owin middleware (for example wiring up ADAL or a custom request logger). 
+- Stateless services can use null during listener creation (for reliable state).
+
+- The listener also exposes Owin Startup to you so you can use *OnOwinPreMapping* and *OnOwinPostMapping* method to wire up any other custom Owin middleware (for example wiring up ADAL, a custom request logger or even other Owin components such as WebApi). 
 
 - The listener maintains a reference to the Session Manager where you can access it from anywhere in your service (for example in OnRunAsync method) as the following:
 
@@ -115,10 +117,10 @@ WebSocketServer.ServiceFabric.Services library contain classes that you need to 
         foreach (var client in clients)
             await ((GeneralWSSession)client).SayHelloToGeneral(string.Format("To all general - {0}", DateTime.UtcNow.Ticks));
         
-
+		// custom session types can have fields such as CustomerType which cna be used for filtering 
 	 
 
-- Service Fabric extends the default session manager to implement a multi type session manager.  
+- Service Fabric extends the default session manager to implement a multi-type session manager(instead of the 1:1 session manager used in the underlying Owin).  
 
 > check the TestStatefulSvc project for the complete sample code.  
 
@@ -135,10 +137,10 @@ On the client side you can use standard ClientWebSocket (of System.Net.WebSocket
 ## Of Interest: Sequential Multi Q Task Scheduler ##
 In order to allow ordered messages on the down stream. The web socket server sets on top of a custom task scheduler. The task scheduler allows the following: 
 
-1. Execute Tasks in order per q. 
-2. One scheduler can manage multiple number of queues.
+1. Execute Tasks in order per queue. 
+2. One scheduler can manage N number of queues.
 3. Put task at the end of the queue or at the Beginning of the queue (low priority vs high priority).
-4. Because it is built using the .NET TPL you can use standard await constructs. 
+4. Because it is built using the .NET TPL you can use standard await/When/ContinueWith constructs. 
 
 
 
